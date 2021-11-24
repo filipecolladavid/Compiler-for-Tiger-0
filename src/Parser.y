@@ -10,7 +10,7 @@ import Lexer
 %token
 
 num                        { TOK_NUM $$ }
---str                        { TOK_STR $$ }
+--str                      { TOK_STR $$ }
 id                         { TOK_ID $$ }
 int                        { TOK_INT }
 string                     { TOK_STRING }
@@ -54,11 +54,12 @@ while                      { TOK_WHILE }
 '|'                        { TOK_OR }
 ':='                       { TOK_ASSIGN }
 
-%left ':='
-%left '=' '<>' '>' '>=' '<='
+%right ':='
+%nonassoc '>' '<' '='
+%left '<>' '>=' '<='
 %left '+' '-'
 %left '*' '/' '%'
-%left '-'
+%left NEG
 %left '(' ')'
 
 %%
@@ -104,6 +105,7 @@ VarDecl : var id ':=' Exp            { VD $2 $4 }
 
 -- lvalue 
 LValue : id                          { Lv $1 }
+       | id '[' Exp ']'              { LvArray $1 $3 }
 
 -- expr-seq
 ExpSeq : Exp                         { S_Simple $1 }
@@ -129,10 +131,12 @@ Exp : num                            { Num $1 }
     | Exp '<=' Exp                   { LessOrEqual $1 $3 }
     | Exp '>'Exp                     { More $1 $3 }
     | Exp '>=' Exp                   { More_Equal $1 $3 }
-    | '-' Exp                        { Neg $2 }
+    | '-' Exp %prec NEG              { Neg $2 }
     | id ':=' Exp                    { AssignValue $1 $3}
     | id '(' ExpList ')'             { Id_ExpList $1 $3}
+    | id '(' ')'                     { Id_ExpListOpt $1 }
     | '(' ExpSeq ')'                 { ES $2 }
+    | '(' ')'                        { ESOpt }
     | if Exp then Exp                { If_Then $2 $4 }
     | if Exp then Exp else Exp       { If_Then_Else $2 $4 $6 }
     | while Exp do Exp               { While $2 $4 }
@@ -141,6 +145,7 @@ Exp : num                            { Num $1 }
     | let VarDeclList in ExpSeq end  { Let $2 $4 }
     | printi '(' Exp ')'             { Printi $3}
     | scani '(' ')'                  { Scani }
+    | intArray '[' Exp ']' of Exp    { IntA $3 $6 }
 
 {
 
@@ -160,7 +165,9 @@ data Exp = Num Int
          | Neg Exp
          | AssignValue String Exp
          | Id_ExpList String ExpList
+         | Id_ExpListOpt String
          | ES ExpSeq
+         | ESOpt
          | If_Then Exp Exp
          | If_Then_Else Exp Exp Exp
          | While Exp Exp
@@ -168,9 +175,11 @@ data Exp = Num Int
          | Let VarDeclList ExpSeq
          | Printi Exp 
          | Scani
+         | IntA Exp Exp
          deriving Show
 
 data LValue = Lv String
+            | LvArray String Exp
             deriving Show
 
 data ExpSeq = S_Simple Exp 
