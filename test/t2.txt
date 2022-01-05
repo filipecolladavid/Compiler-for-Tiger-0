@@ -3,4 +3,4 @@ let
      if n>0 then n*fact(n-1) 
      else 1
 in 
-  printi(fact(10)) 
+  printi(fact(10)) rs
