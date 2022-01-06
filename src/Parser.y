@@ -54,9 +54,9 @@ while                      { TOK_WHILE }
 '|'                        { TOK_OR }
 ':='                       { TOK_ASSIGN }
 
-%right ':='
-%nonassoc '>' '<' '='
-%left '<>' '>=' '<='
+%left ':='
+%nonassoc '=' '<>'
+%left '>' '>=' '<='
 %left '+' '-'
 %left '*' '/' '%'
 %left NEG
@@ -70,8 +70,8 @@ while                      { TOK_WHILE }
 Program : let DeclList in ExpSeq     { Prog $2 $4 }
 
 --decl-list 
-DeclList : Decl                      { DecL $1 }
-         | DeclList Decl             { DecL_ $1 $2 }
+DeclList : Decl                      { DecL $1 } --[$1]
+         | DeclList Decl             { DecL_ $1 $2 } --{$1 ++[$3]}
 
 --decl
 Decl : VarDecl                       { VDecl $1 } 
@@ -85,7 +85,7 @@ FunDecl : function id '(' TypeFields ')' '=' Exp            { Func $2 $4 $7}
 
 --type-fields
 TypeFields : TypeField                  { Tfs $1 }
-           | TypeFields ',' TypeField   { Tfs_ $1 $3 }
+           | TypeFields ',' TypeField   { Tfs_ $1 $3 } --ser vazio, tudo o que for opcional { }
 
 --type-field
 TypeField : id ':' TypeId               { TF $1 $3 }
