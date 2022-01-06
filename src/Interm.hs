@@ -41,3 +41,8 @@ newLabel :: State Count Label
 newLabel = do (t,l)<-get; put (t,l+1); return ("L"++show l)
 
 ------------------------------------------------------------------------
+
+genProg :: Program -> [Instr]
+genProg a = let (t, count) = runState (tableProg Map.empty a) (0,0) in
+            evalState (transProg t a) count
+
