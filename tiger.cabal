@@ -11,7 +11,7 @@ cabal-version:       >=1.10
                      
 executable tiger
   main-is:             Main.hs
-  other-modules:       Lexer, Parser
+  other-modules:       Lexer, Parser, Interm
   build-tools:         alex, happy
   build-depends:       base, array, containers, mtl
   hs-source-dirs:      src

@@ -119,7 +119,7 @@ ExpList : Exp                        { L_Simple $1 }
 
 Exp : num                            { Num $1 }
     --| str                            { C_Str $1 }
-    | LValue                         { Id $1 }                 
+    | id                             { Id $1 } -- Was Lvalue             
     | Exp '+' Exp                    { Add $1 $3 }
     | Exp '-' Exp                    { Sub $1 $3 }
     | Exp '*' Exp                    { Mult $1 $3 }
@@ -150,7 +150,7 @@ Exp : num                            { Num $1 }
 {
 
 data Exp = Num Int
-         | Id LValue
+         | Id String -- before Id Lvalue (maybe wrong)
          | Add Exp Exp
          | Sub Exp Exp
          | Mult Exp Exp
