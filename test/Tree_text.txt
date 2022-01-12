@@ -1,0 +1,11 @@
+Prog 
+    (DeclLV 
+        (VarDecl "s" (Num 0))
+        (DeclLV 
+            (VarDecl "n" (Num 1)) 
+            (VDecl 
+                (VarDecl "k" (Num 2))
+            )
+        )
+    )
+    (S_Comp (S_Simple (While (LessOrEqual (Id "n") (Num 10)) (ES (S_Comp (S_Simple (AssignValue "s" (Add (Id "s") (Mult (Id "n") (Id "n"))))) (AssignValue "n" (Add (Id "n") (Num 1))))))) (Printi (Id "n")))

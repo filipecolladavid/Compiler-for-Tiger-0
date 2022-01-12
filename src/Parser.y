@@ -70,12 +70,13 @@ while                      { TOK_WHILE }
 Program : let DeclList in ExpSeq     { Prog $2 $4 }
 
 --decl-list 
-DeclList : Decl                      { DecL $1 } --[$1]
-         | DeclList Decl             { DecL_ $1 $2 } --{$1 ++[$3]}
 
---decl
-Decl : VarDecl                       { VDecl $1 } 
-     | FunDecl                       { FDecl $1 }
+DeclList : VarDecl                   { VDecl $1 }
+         | FunDecl                   { FDecl $1 }
+         | FunDecl DeclList          { DeclLF $1 $2 }
+         | VarDecl DeclList          { DeclLV $1 $2 }
+
+VarDecl : var id ':=' Exp            { VrDecl $2 $4 }
 
 --fun-decl
 FunDecl : function id '(' TypeFields ')' '=' Exp            { Func $2 $4 $7}
@@ -98,10 +99,13 @@ TypeId : int                            { Int }
 -- VARIABLE DECLARATIONS
 
 -- var-decl-list
-VarDeclList : VarDecl                { VDL $1 }
-            | VarDeclList VarDecl    { VDL_ $1 $2 }
+VarDeclList : var id ':=' Exp                { VDL $2 $4 }
+            | var id ':=' Exp VarDeclList    { VDL_ $2 $4 $5 }
+
+{-
 -- var-decl
 VarDecl : var id ':=' Exp            { VD $2 $4 }
+-}
 
 -- lvalue 
 LValue : id                          { Lv $1 }
@@ -190,27 +194,21 @@ data ExpList = L_Simple Exp
              | L_Comp ExpList Exp
              deriving Show
 
-
-
-data VarDeclList = VDL VarDecl 
-                 | VDL_ VarDeclList VarDecl
+data VarDeclList = VDL String Exp 
+                 | VDL_ String Exp VarDeclList
                  deriving Show
-
-data VarDecl = VD String Exp
-             deriving Show
-
-
 
 data Program = Prog DeclList ExpSeq
         deriving Show
 
-data DeclList = DecL Decl
-              | DecL_ DeclList Decl
+data DeclList = VDecl VarDecl
+              | FDecl FunDecl
+              | DeclLF FunDecl DeclList
+              | DeclLV VarDecl DeclList
               deriving Show
 
-data Decl = VDecl VarDecl
-          | FDecl FunDecl
-          deriving Show
+data VarDecl = VrDecl String Exp
+              deriving Show
 
 data FunDecl = Func String TypeFields Exp
              | FuncOpt String Exp
